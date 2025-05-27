@@ -1,5 +1,4 @@
-# Use official Eclipse Temurin JDK 17
-FROM eclipse-temurin:17-jdk-jammy
+FROM openjdk:17-jdk-alpine
 
 # Create app directory
 WORKDIR /app
