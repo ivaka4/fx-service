@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: jdbc:mysql://mysql:3306/fxdb?useSSL=false&serverTimezone=UTC
+    username: root
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+      dialect: org.hibernate.dialect.MySQL8Dialect
+    show-sql: true
+
+  redis:
+    host: redis
+    port: 6379
+
+server:
+  port: 8080
+
+
+fx:
+  provider:
+    url: https://api.currencylayer.com/live
+    api-key: #secret
+    # currencylayer free plan always uses USD as base
+    base-currency: USD
