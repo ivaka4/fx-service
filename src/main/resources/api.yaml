@@ -31,7 +31,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExchangeRateDto'
+                $ref: '#/components/schemas/ExchangeRateResponse'
 
   /convert:
     post:
@@ -45,14 +45,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ConversionRequestDto'
+              $ref: '#/components/schemas/ConversionRequest'
       responses:
         '200':
           description: Conversion result
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConversionResponseDto'
+                $ref: '#/components/schemas/ConversionResponse'
 
   /history:
     get:
@@ -67,6 +67,7 @@ paths:
           required: false
           schema:
             type: string
+            format: uuid
         - name: date
           in: query
           description: Filter by conversion date (YYYY-MM-DD)
@@ -96,11 +97,11 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ConversionResponseDto'
+                  $ref: '#/components/schemas/ConversionResponse'
 
 components:
   schemas:
-    LiveRatesResponse:
+    CurrencyLayerResponse:
       type: object
       required:
         - success
@@ -122,7 +123,7 @@ components:
           type: object
           additionalProperties:
             type: number
-    ExchangeRateDto:
+    ExchangeRateResponse:
       type: object
       required:
         - from
@@ -137,10 +138,10 @@ components:
           description: Target currency code
         rate:
           type: number
-          format: float
+          format: decimal
           description: Current exchange rate
 
-    ConversionRequestDto:
+    ConversionRequest:
       type: object
       required:
         - amount
@@ -149,7 +150,7 @@ components:
       properties:
         amount:
           type: number
-          format: float
+          format: decimal
           description: Amount to convert
         from:
           type: string
@@ -158,9 +159,9 @@ components:
           type: string
           description: Target currency code
 
-    ConversionResponseDto:
+    ConversionResponse:
       allOf:
-        - $ref: '#/components/schemas/ConversionRequestDto'
+        - $ref: '#/components/schemas/ConversionRequest'
         - type: object
           required:
             - convertedAmount
@@ -169,10 +170,15 @@ components:
           properties:
             convertedAmount:
               type: number
-              format: float
+              format: decimal
               description: Result of the conversion
+            ratePrecision:
+              type: number
+              format: decimal
+              description: Rate precision of the conversion
             transactionId:
               type: string
+              format: uuid
               description: Unique ID for this conversion
             timestamp:
               type: string
