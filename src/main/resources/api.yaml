@@ -68,13 +68,20 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: date
+        - name: startDate
           in: query
           description: Filter by conversion date (YYYY-MM-DD)
           required: false
           schema:
             type: string
-            format: date
+            format: date-time
+        - name: endDate
+          in: query
+          description: Filter by conversion date (YYYY-MM-DD)
+          required: false
+          schema:
+            type: string
+            format: date-time
         - name: page
           in: query
           description: Page number (0-based)
@@ -101,6 +108,19 @@ paths:
 
 components:
   schemas:
+    CurrencyLayerError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          description: Numeric error code returned by CurrencyLayer
+        info:
+          type: string
+          description: Human-readable error message from CurrencyLayer
+      required:
+        - code
+        - info
     CurrencyLayerResponse:
       type: object
       required:
@@ -123,6 +143,8 @@ components:
           type: object
           additionalProperties:
             type: number
+        error:
+          $ref: '#/components/schemas/CurrencyLayerError'
     ExchangeRateResponse:
       type: object
       required:
@@ -154,9 +176,11 @@ components:
           description: Amount to convert
         from:
           type: string
+          pattern: '^[A-Z]{3}$'
           description: Source currency code
         to:
           type: string
+          pattern: '^[A-Z]{3}$'
           description: Target currency code
 
     ConversionResponse:

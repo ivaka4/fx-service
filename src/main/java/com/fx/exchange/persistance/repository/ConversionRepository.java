@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,5 +15,5 @@ import java.util.UUID;
 public interface ConversionRepository extends JpaRepository<ConversionEntity, Integer> {
     Optional<ConversionEntity> findByTransactionId(UUID transactionId);
 
-    List<ConversionEntity> findByConvertedAtBetween(LocalDate start, LocalDate end, Pageable pageable);
+    List<ConversionEntity> findByConvertedAtBetween(OffsetDateTime start, OffsetDateTime end, Pageable pageable);
 }
