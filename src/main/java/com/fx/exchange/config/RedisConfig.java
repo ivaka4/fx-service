@@ -23,7 +23,6 @@ public class RedisConfig {
 
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
-        // clearly see that RedisStandaloneConfiguration is using the env props
         RedisStandaloneConfiguration cfg = new RedisStandaloneConfiguration(redisHost, redisPort);
         return new LettuceConnectionFactory(cfg);
     }

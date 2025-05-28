@@ -7,7 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.context.request.WebRequest;
@@ -30,11 +32,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             MethodArgumentNotValidException.class,
             BindException.class,
-            HttpMessageConversionException.class
+            HttpMessageConversionException.class,
+            MissingServletRequestParameterException.class
     })
     public ResponseEntity<ErrorResponse> handleValidationErrors(Exception ex) {
         String message;
-        if (ex instanceof MethodArgumentNotValidException manv) {
+        if (ex instanceof MissingServletRequestParameterException msrp) {
+            message = String.format("Required query parameter '%s' is missing", msrp.getParameterName());
+        } else if (ex instanceof MethodArgumentNotValidException manv) {
             message = manv.getBindingResult().getFieldErrors().stream()
                     .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
                     .collect(Collectors.joining(", "));
@@ -65,7 +70,6 @@ public class GlobalExceptionHandler {
                 .body(body);
     }
 
-    // --- handle errors calling external REST services (e.g. RestTemplate) ---
     @ExceptionHandler(RestClientException.class)
     public ResponseEntity<ErrorResponse> handleRestClient(RestClientException ex) {
         ErrorResponse body = new ErrorResponse("EXTERNAL_SERVICE_ERROR", ex.getMessage());
@@ -84,5 +88,26 @@ public class GlobalExceptionHandler {
                 .body(body);
     }
 
-    public record ErrorResponse(String error, String message) { }
+    /**
+     * Handle HTTP method not supported (e.g. POST on a GET-only endpoint).
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex) {
+        String msg = String.format("'%s' is not supported for this endpoint. Supported methods: %s",
+                ex.getMethod(),
+                String.join(", ", ex.getSupportedHttpMethods().stream()
+                        .map(Object::toString)
+                        .toList()));
+        ErrorResponse body = new ErrorResponse("METHOD_NOT_ALLOWED", msg);
+        return ResponseEntity
+                .status(HttpStatus.METHOD_NOT_ALLOWED)
+                .header(HttpHeaders.ALLOW, String.join(", ",
+                        ex.getSupportedHttpMethods().stream()
+                                .map(Object::toString)
+                                .toList()))
+                .body(body);
+    }
+
+    public record ErrorResponse(String error, String message) {
+    }
 }
